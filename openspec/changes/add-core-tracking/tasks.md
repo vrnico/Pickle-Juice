@@ -40,8 +40,8 @@
 
 ## 5. Specs & verification (W1 — specs worktree)
 
-- [ ] 5.1 Run `openspec validate add-core-tracking` and resolve any validation errors
-- [ ] 5.2 Map every scenario in `specs/core-tracking/spec.md` to at least one manual test in `docs/manual-test-plan.md`
+- [x] 5.1 Run `openspec validate add-core-tracking` and resolve any validation errors
+- [x] 5.2 Map every scenario in `specs/core-tracking/spec.md` to at least one manual test in `docs/manual-test-plan.md`
 - [ ] 5.3 Walk every scenario by hand on a Vercel preview deploy before archiving the change
 
 ## 6. Ship
