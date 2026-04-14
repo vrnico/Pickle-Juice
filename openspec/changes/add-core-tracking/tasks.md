@@ -7,14 +7,14 @@
 
 ## 2. Data layer (W3 — data-engine worktree)
 
-- [ ] 2.1 Install Dexie and define the `picklejuice` database with a `sessions` table (`id`, `category`, `startIso`, `endIso`, `durationSeconds`, `notes`, `createdAt`, `updatedAt`)
-- [ ] 2.2 Implement session repository in `lib/db/sessions.ts` (create, update, delete, listByRange, listAll)
-- [ ] 2.3 Implement active-session state machine (`idle` → `running` → `idle`) persisted so reloads can recover
-- [ ] 2.4 Implement interrupted-session recovery logic per spec (Keep running / End now)
-- [ ] 2.5 Implement "stop under 1s is discarded" rule
-- [ ] 2.6 Implement CSV export helper in `lib/export/csv.ts` returning a Blob with the spec's columns
-- [ ] 2.7 Implement aggregation helpers (`sumByCategory(range)`, `ratioForDay(date)`, `ratioForLast7Days()`)
-- [ ] 2.8 Unit tests for repository, state machine, aggregations, and CSV export
+- [x] 2.1 Install Dexie and define the `picklejuice` database with a `sessions` table (`id`, `category`, `startIso`, `endIso`, `durationSeconds`, `notes`, `createdAt`, `updatedAt`)
+- [x] 2.2 Implement session repository in `lib/db/sessions.ts` (create, update, delete, listByRange, listAll)
+- [x] 2.3 Implement active-session state machine (`idle` → `running` → `idle`) persisted so reloads can recover
+- [x] 2.4 Implement interrupted-session recovery logic per spec (Keep running / End now)
+- [x] 2.5 Implement "stop under 1s is discarded" rule
+- [x] 2.6 Implement CSV export helper in `lib/export/csv.ts` returning a Blob with the spec's columns
+- [x] 2.7 Implement aggregation helpers (`sumByCategory(range)`, `ratioForDay(date)`, `ratioForLast7Days()`)
+- [x] 2.8 Unit tests for repository, state machine, aggregations, and CSV export
 
 ## 3. UI layer (W2 — pwa-ui worktree)
 
