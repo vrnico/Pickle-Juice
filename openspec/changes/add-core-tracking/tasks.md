@@ -1,8 +1,8 @@
 ## 1. Project scaffolding (shared foundation)
 
-- [ ] 1.1 Initialize Next.js 16 App Router project with TypeScript and Tailwind in repo root
+- [x] 1.1 Initialize Next.js 16 App Router project with TypeScript and Tailwind in repo root
 - [ ] 1.2 Add shadcn/ui and install base components (Button, Card, Dialog, Toast)
-- [ ] 1.3 Configure ESLint, Prettier, and a pre-commit hook
+- [x] 1.3 Configure ESLint, Prettier, and a pre-commit hook
 - [ ] 1.4 Link project to Vercel and verify a preview deploy of the empty Next.js shell succeeds
 
 ## 2. Data layer (W3 — data-engine worktree)
