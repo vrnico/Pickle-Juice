@@ -13,7 +13,7 @@ This repo is scaffolded with [OpenSpec](https://github.com/Fission-AI/OpenSpec) 
 This is a spec-first repo. At the moment it contains the **plan**, not the built app:
 
 ```
-PickleJuice/
+Pickle-Juice/
 ├── openspec/
 │   ├── project.md                              ← product vision + stack
 │   └── changes/add-core-tracking/
@@ -60,8 +60,8 @@ openspec --version
 ## Quick start — read-only (just look at the specs)
 
 ```bash
-git clone https://github.com/vrnico/PickleJuice.git
-cd PickleJuice
+git clone https://github.com/vrnico/Pickle-Juice.git
+cd Pickle-Juice
 
 # Validate the change proposal
 openspec validate add-core-tracking --strict
@@ -84,8 +84,8 @@ This is how the project is designed to be built. You'll end up with **three term
 ### 1. Fork + clone
 
 ```bash
-gh repo fork vrnico/PickleJuice --clone
-cd PickleJuice
+gh repo fork vrnico/Pickle-Juice --clone
+cd Pickle-Juice
 ```
 
 (Or clone directly if you're not submitting a PR back.)
@@ -99,9 +99,9 @@ git branch specs/core-tracking
 git branch feat/pwa-ui
 git branch feat/data-engine
 
-git worktree add ../PickleJuice-W1-specs       specs/core-tracking
-git worktree add ../PickleJuice-W2-pwa-ui      feat/pwa-ui
-git worktree add ../PickleJuice-W3-data-engine feat/data-engine
+git worktree add ../Pickle-Juice-W1-specs       specs/core-tracking
+git worktree add ../Pickle-Juice-W2-pwa-ui      feat/pwa-ui
+git worktree add ../Pickle-Juice-W3-data-engine feat/data-engine
 ```
 
 You now have three sibling directories, each on its own branch, sharing the same git history.
@@ -110,15 +110,15 @@ You now have three sibling directories, each on its own branch, sharing the same
 
 ```bash
 # Terminal 1 — specs
-cd ../PickleJuice-W1-specs
+cd ../Pickle-Juice-W1-specs
 claude "Read docs/worktrees/W1-specs.md and work that brief."
 
 # Terminal 2 — PWA UI
-cd ../PickleJuice-W2-pwa-ui
+cd ../Pickle-Juice-W2-pwa-ui
 claude "Read docs/worktrees/W2-pwa-ui.md and work that brief."
 
 # Terminal 3 — data engine
-cd ../PickleJuice-W3-data-engine
+cd ../Pickle-Juice-W3-data-engine
 claude "Read docs/worktrees/W3-data-engine.md and work that brief."
 ```
 
