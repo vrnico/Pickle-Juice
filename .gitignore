@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Production
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# Testing
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env*.local
+.env.development
+.env.production
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Editor / OS
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code local state (keep shared skills/commands, ignore per-user)
+.claude/settings.local.json
+.claude/logs/
+.claude/memory/
+
+# OpenSpec local caches (keep the spec dirs)
+.openspec/cache/
