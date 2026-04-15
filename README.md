@@ -57,23 +57,57 @@ openspec --version
 
 ---
 
-## Quick start — read-only (just look at the specs)
+## Quick start — run the app
 
 ```bash
 git clone https://github.com/vrnico/Pickle-Juice.git
 cd Pickle-Juice
+npm install
+npm run dev
+```
 
-# Validate the change proposal
+Open **http://localhost:3000** in Chrome or Edge. You should see two big buttons: **Consume** (blue) and **Create** (green). Tap one, wait a few seconds, tap **Stop**, then visit the **Dashboard**, **History**, and **Settings** tabs.
+
+### Test it on your phone (same Wi-Fi)
+
+```bash
+npm run dev -- -H 0.0.0.0
+```
+
+Find your machine's LAN IP and visit `http://<ip>:3000` on your phone. Note: the PWA install prompt only fires over localhost or HTTPS, not raw LAN HTTP.
+
+### Test the PWA shell (service worker + offline + install)
+
+The service worker is only registered in production mode:
+
+```bash
+npm run build
+npm start
+```
+
+Then in Chrome DevTools → **Application**:
+- **Manifest** — check name, icons, theme color
+- **Service Workers** — `/sw.js` should be activated
+- Click the install icon in the URL bar to install as a desktop app
+- Toggle **Network → Offline** and reload — the app should still boot
+
+### Run the data-engine unit tests
+
+```bash
+npm test
+```
+
+You should see `30 passed`.
+
+### Read the specs without running anything
+
+```bash
 openspec validate add-core-tracking --strict
-
-# Dump the spec as one readable markdown doc
 openspec show add-core-tracking --type change
-
-# List every requirement + scenario
 openspec list --specs
 ```
 
-You can read `openspec/changes/add-core-tracking/specs/core-tracking/spec.md` top to bottom to understand what the app does before a single line of code exists. That's the point of spec-first.
+Top to bottom, `openspec/changes/add-core-tracking/specs/core-tracking/spec.md` is the behavior contract.
 
 ---
 
@@ -149,12 +183,41 @@ If you want to build it yourself start-to-finish without the Claude-per-worktree
 Once §1 is done, the usual Next.js dev loop works:
 
 ```bash
-pnpm install
-pnpm dev          # http://localhost:3000
-pnpm build
-pnpm start
-pnpm test         # Vitest, once §2.8 is done
+npm install
+npm run dev       # http://localhost:3000
+npm run build
+npm start
+npm test          # Vitest, once §2.8 is done
 ```
+
+(`pnpm` works too if you prefer — this repo ships an npm `package-lock.json`.)
+
+---
+
+## Troubleshooting
+
+**Home screen shows "Loading…" forever or you don't see the Consume / Create buttons.**
+You're on an old checkout. Pull the latest and restart the dev server:
+
+```bash
+git pull
+# Ctrl+C the running npm run dev, then:
+npm run dev
+```
+
+Next.js's Fast Refresh can't always recover when hook signatures change between commits — a full restart resolves it.
+
+**`git pull` succeeded but the page still looks stale.**
+Hard reload in the browser (Cmd/Ctrl+Shift+R), or in DevTools → **Application** → **Storage** → **Clear site data**. The service worker caches aggressively.
+
+**Timer looks wrong or app misbehaves after a redeploy.**
+Clear IndexedDB: DevTools → **Application** → **IndexedDB** → right-click `picklejuice` → **Delete database**. Your sessions live there; export first via Settings → Export CSV if you care about them.
+
+**`npm install` errors on `sharp` or native bindings.**
+`sharp` is only used to regenerate PWA icons (`npm run gen-icons`, if you need to rerun it). If install fails, delete `sharp` from `package.json`'s devDependencies — the committed PNGs are already in `public/`.
+
+**Install prompt never appears on my phone.**
+PWAs require HTTPS (or localhost). LAN HTTP won't trigger `beforeinstallprompt`. Deploy to Vercel and test from the preview URL.
 
 ---
 
