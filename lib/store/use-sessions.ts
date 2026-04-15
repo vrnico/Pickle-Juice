@@ -10,12 +10,11 @@ import {
 import type {
   ActiveSession,
   Category,
+  ConsumeSubtype,
   DraftSession,
   Session,
 } from "@/lib/db/types";
 import {
-  dayRangeIso,
-  last7DaysRangeIso,
   ratioForDay,
   ratioForLast7Days,
   type RatioSummary,
@@ -58,10 +57,21 @@ export function useElapsedSeconds(active: ActiveSession): number {
   }, [active]);
   return useMemo(() => {
     if (!active) return 0;
-    return timer.elapsedSeconds(
-      { kind: "running", category: active.category, startIso: active.startIso },
-      nowIso(),
-    );
+    return timer.elapsedSeconds(timer.fromActive(active), nowIso());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, tick]);
+}
+
+export function usePomodoroSecondsRemaining(active: ActiveSession): number | null {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!active?.pomodoro) return;
+    const id = setInterval(() => setTick((t) => t + 1), 500);
+    return () => clearInterval(id);
+  }, [active]);
+  return useMemo(() => {
+    if (!active?.pomodoro) return null;
+    return timer.pomodoroSecondsRemaining(timer.fromActive(active), nowIso());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, tick]);
 }
@@ -69,15 +79,41 @@ export function useElapsedSeconds(active: ActiveSession): number {
 export interface StartAttempt {
   ok: boolean;
   alreadyActive?: ActiveSession;
+  blocked?: "leisure-empty";
+}
+
+export interface StartArgs {
+  category: Category;
+  subtype?: ConsumeSubtype;
+  linkedItemId?: string;
+  pomodoro?: { focusMinutes: number; breakMinutes: number };
 }
 
 export function useTimerActions() {
   const active = useActiveSession();
 
   const start = useCallback(
-    async (category: Category): Promise<StartAttempt> => {
+    async (args: StartArgs, opts?: { bankBalance?: number }): Promise<StartAttempt> => {
       if (active) return { ok: false, alreadyActive: active };
-      await repo.setActive({ category, startIso: nowIso() });
+      const isLeisure = args.category === "consume" && args.subtype === "leisure";
+      if (isLeisure && opts?.bankBalance !== undefined && opts.bankBalance <= 0) {
+        return { ok: false, blocked: "leisure-empty" };
+      }
+      const newActive: ActiveSession = {
+        category: args.category,
+        subtype: args.subtype,
+        linkedItemId: args.linkedItemId,
+        startIso: nowIso(),
+        pomodoro: args.pomodoro
+          ? {
+              focusMinutes: args.pomodoro.focusMinutes,
+              breakMinutes: args.pomodoro.breakMinutes,
+              phase: "focus",
+              phaseStartIso: nowIso(),
+            }
+          : undefined,
+      };
+      await repo.setActive(newActive);
       return { ok: true };
     },
     [active],
@@ -85,24 +121,17 @@ export function useTimerActions() {
 
   const stop = useCallback(async (): Promise<Session | null> => {
     if (!active) return null;
-    const result = timer.stop(
-      { kind: "running", category: active.category, startIso: active.startIso },
-      nowIso(),
-    );
+    const result = timer.stop(timer.fromActive(active), nowIso());
     await repo.setActive(null);
     if (!result.draft) return null;
     return repo.createFromDraft(result.draft);
   }, [active]);
 
-  const keepRunning = useCallback(async () => {
-    // no-op: simply preserve the active row
-  }, []);
-
   const endInterruptedNow = useCallback(async (): Promise<Session | null> => {
     return stop();
   }, [stop]);
 
-  return { start, stop, keepRunning, endInterruptedNow };
+  return { start, stop, endInterruptedNow };
 }
 
 export function useSessionActions() {
@@ -139,5 +168,3 @@ export async function exportSessionsCsv(): Promise<string | null> {
     throw e;
   }
 }
-
-export { dayRangeIso, last7DaysRangeIso };

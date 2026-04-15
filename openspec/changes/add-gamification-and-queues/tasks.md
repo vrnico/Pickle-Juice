@@ -38,8 +38,8 @@
 - [x] 5.2 Auto-stop logic when the focus block elapses; emits a `PomodoroComplete` event the UI subscribes to
 - [x] 5.3 Break countdown, no bank effect during break
 - [x] 5.4 Bank-empty short-circuit during a leisure Pomodoro
-- [ ] 5.5 Settings UI for focus/break lengths
-- [ ] 5.6 Home toggle for Pomodoro mode persists in `prefs`
+- [x] 5.5 Settings UI for focus/break lengths
+- [x] 5.6 Home toggle for Pomodoro mode persists in `prefs`
 - [x] 5.7 Vitest for the Pomodoro state machine
 
 ## 6. Cosmetic progression (W-data + W-ui)
@@ -48,42 +48,42 @@
 - [x] 6.2 Hook XP awards into session-saved events
 - [x] 6.3 Streak evaluator runs on app boot and after each Create session save
 - [x] 6.4 `lib/themes/themes.ts` — static array of theme objects (id, name, palette CSS variables, unlocked-at-level)
-- [ ] 6.5 Settings → Themes UI: grid of unlocked vs. locked themes with selection
-- [ ] 6.6 Apply selected theme via CSS-variable swap on `<html>`
-- [ ] 6.7 Profile screen — XP, level + progress bar, current streak, longest streak, themes grid, "How this works" disclosure
+- [x] 6.5 Settings → Themes UI: grid of unlocked vs. locked themes with selection
+- [x] 6.6 Apply selected theme via CSS-variable swap on `<html>`
+- [x] 6.7 Profile screen — XP, level + progress bar, current streak, longest streak, themes grid, "How this works" disclosure
 - [ ] 6.8 Level-up celebration overlay (one-time per level)
 - [x] 6.9 Vitest for XP, level boundaries, streak transitions
 
 ## 7. UI shell + pickers (W-ui)
 
-- [ ] 7.1 Home screen redesign — bank pill, Pomodoro toggle, Consume button → consume picker, Create button → create picker
-- [ ] 7.2 Consume picker — Research vs Leisure tabs, list queue items, "Freestyle" option asks for subtype
-- [ ] 7.3 Create picker — pending + in-progress todos, "Freestyle" option
-- [ ] 7.4 Active-session view shows Pomodoro countdown when applicable
-- [ ] 7.5 End-of-Pomodoro modal: take break / stop
-- [ ] 7.6 End-of-Create-session prompt: mark linked todo done?
-- [ ] 7.7 Mid-leisure bank-empty modal: stops session, explains why
+- [x] 7.1 Home screen redesign — bank pill, Pomodoro toggle, Consume button → consume picker, Create button → create picker
+- [x] 7.2 Consume picker — Research vs Leisure tabs, list queue items, "Freestyle" option asks for subtype
+- [x] 7.3 Create picker — pending + in-progress todos, "Freestyle" option
+- [x] 7.4 Active-session view shows Pomodoro countdown when applicable
+- [x] 7.5 End-of-Pomodoro modal: take break / stop
+- [x] 7.6 End-of-Create-session prompt: mark linked todo done?
+- [x] 7.7 Mid-leisure bank-empty modal: stops session, explains why
 
 ## 8. Queue + Todos screens (W-ui)
 
-- [ ] 8.1 Queue screen — grouped by tag, add/edit/delete dialogs
-- [ ] 8.2 Todos screen — grouped by status, add/edit/delete dialogs, recent-activity panel per todo
-- [ ] 8.3 Pending-research badges on todos and Profile
+- [x] 8.1 Queue screen — grouped by tag, add/edit/delete dialogs
+- [x] 8.2 Todos screen — grouped by status, add/edit/delete dialogs, recent-activity panel per todo
+- [x] 8.3 Pending-research badges on todos and Profile
 
 ## 9. Share Target + bookmarklet (W-ui)
 
-- [ ] 9.1 Update `public/manifest.webmanifest` with `share_target` entry pointing to `/share`
-- [ ] 9.2 Implement `app/share/page.tsx` — reads query params, prefills add-to-queue form, defaults tag to Leisure
-- [ ] 9.3 Settings → "Add to Pickle Juice" bookmarklet — generated from the current location's origin, copy-to-clipboard + drag-to-bookmarks-bar UI
+- [x] 9.1 Update `public/manifest.webmanifest` with `share_target` entry pointing to `/share`
+- [x] 9.2 Implement `app/share/page.tsx` — reads query params, prefills add-to-queue form, defaults tag to Leisure
+- [x] 9.3 Settings → "Add to Pickle Juice" bookmarklet — generated from the current location's origin, copy-to-clipboard + drag-to-bookmarks-bar UI
 
 ## 10. Settings additions (W-ui)
 
-- [ ] 10.1 Earn ratio slider (1.0–5.0)
-- [ ] 10.2 Apply window slider (1–30 days)
-- [ ] 10.3 Pomodoro focus + break length inputs
-- [ ] 10.4 Streak threshold input
-- [ ] 10.5 Themes grid (mirrors Profile)
-- [ ] 10.6 "Reset Time Bank" destructive action with confirmation
+- [x] 10.1 Earn ratio slider (1.0–5.0)
+- [x] 10.2 Apply window slider (1–30 days)
+- [x] 10.3 Pomodoro focus + break length inputs
+- [x] 10.4 Streak threshold input
+- [x] 10.5 Themes grid (mirrors Profile)
+- [x] 10.6 "Reset Time Bank" destructive action with confirmation
 
 ## 11. Specs & verification (W-spec)
 
