@@ -87,8 +87,8 @@
 
 ## 11. Specs & verification (W-spec)
 
-- [ ] 11.1 `openspec validate add-gamification-and-queues --strict` passes
-- [ ] 11.2 Extend `docs/manual-test-plan.md` with rows for every new scenario across all 7 capability spec files
+- [x] 11.1 `openspec validate add-gamification-and-queues --strict` passes
+- [x] 11.2 Extend `docs/manual-test-plan.md` with rows for every new scenario across all 7 capability spec files
 - [ ] 11.3 Walk every new scenario by hand on a Vercel preview before archiving
 
 ## 12. Ship
