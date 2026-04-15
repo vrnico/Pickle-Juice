@@ -1,58 +1,58 @@
 ## 1. Migration & shared scaffolding
 
-- [ ] 1.1 Bump Dexie schema to v2 — add `subtype` and `linkedItemId` columns to `sessions`, add new tables `queueItems`, `todos`, `bankLedger`, `pendingResearch`, `progression`, `prefs`
-- [ ] 1.2 Backfill migration — set `subtype = "leisure"` on every existing consume session; leave `linkedItemId` undefined
-- [ ] 1.3 Define shared TypeScript types in `lib/db/types.ts` for `QueueItem`, `Todo`, `BankLedgerEntry`, `PendingResearchEntry`, `ProgressionState`, `Prefs`, and the extended `Session`
-- [ ] 1.4 Seed default `prefs` row on first boot (earnRatio=2.0, applyWindowDays=7, focusMinutes=25, breakMinutes=5, streakThresholdMinutes=10, leisureXp=1, researchXp=2, createXp=3)
+- [x] 1.1 Bump Dexie schema to v2 — add `subtype` and `linkedItemId` columns to `sessions`, add new tables `queueItems`, `todos`, `bankLedger`, `pendingResearch`, `progression`, `prefs`
+- [x] 1.2 Backfill migration — set `subtype = "leisure"` on every existing consume session; leave `linkedItemId` undefined
+- [x] 1.3 Define shared TypeScript types in `lib/db/types.ts` for `QueueItem`, `Todo`, `BankLedgerEntry`, `PendingResearchEntry`, `ProgressionState`, `Prefs`, and the extended `Session`
+- [x] 1.4 Seed default `prefs` row on first boot (earnRatio=2.0, applyWindowDays=7, focusMinutes=25, breakMinutes=5, streakThresholdMinutes=10, leisureXp=1, researchXp=2, createXp=3)
 
 ## 2. Time Bank engine (W-data)
 
-- [ ] 2.1 Implement `lib/domain/time-bank.ts` — pure functions over ledger entries: `currentBalance(entries)`, `entriesForCreateSession(s, ratio)`, `entriesForLeisureSession(s)`, `entriesForResearchExpiry(p)`, `entriesForEdit(prev, next, ratio)`, `entriesForDelete(s, ratio)`
-- [ ] 2.2 Implement `lib/db/bank.ts` repository — append-only ledger writes, current-balance subscription, starter-grant idempotent seed
-- [ ] 2.3 Wire bank earn into `createFromDraft` for Create sessions
-- [ ] 2.4 Wire bank debit into `createFromDraft` for Leisure consume sessions
-- [ ] 2.5 Wire compensating entries on `update` and `delete`
-- [ ] 2.6 Implement leisure-gating predicate `canStartLeisure(balance)`; throw a typed error if attempted with empty bank
-- [ ] 2.7 Implement live-debit ticker — recompute displayed balance each second during an active leisure session
-- [ ] 2.8 Vitest: ledger sums, edit/delete reversal, starter-grant idempotency, leisure gating, mid-session zeroing
+- [x] 2.1 Implement `lib/domain/time-bank.ts` — pure functions over ledger entries: `currentBalance(entries)`, `entriesForCreateSession(s, ratio)`, `entriesForLeisureSession(s)`, `entriesForResearchExpiry(p)`, `entriesForEdit(prev, next, ratio)`, `entriesForDelete(s, ratio)`
+- [x] 2.2 Implement `lib/db/bank.ts` repository — append-only ledger writes, current-balance subscription, starter-grant idempotent seed
+- [x] 2.3 Wire bank earn into `createFromDraft` for Create sessions
+- [x] 2.4 Wire bank debit into `createFromDraft` for Leisure consume sessions
+- [x] 2.5 Wire compensating entries on `update` and `delete`
+- [x] 2.6 Implement leisure-gating predicate `canStartLeisure(balance)`; throw a typed error if attempted with empty bank
+- [x] 2.7 Implement live-debit ticker — recompute displayed balance each second during an active leisure session
+- [x] 2.8 Vitest: ledger sums, edit/delete reversal, starter-grant idempotency, leisure gating, mid-session zeroing
 
 ## 3. Consume Queue + Todos data layer (W-data)
 
-- [ ] 3.1 `lib/db/queue.ts` repository — CRUD, list grouped by tag, mark consumed
-- [ ] 3.2 `lib/db/todos.ts` repository — CRUD, status transitions, recent-activity rollup per todo
-- [ ] 3.3 Validation: research-tagged queue items require a `linkedTodoId`; reject otherwise
-- [ ] 3.4 Vitest for both repositories
+- [x] 3.1 `lib/db/queue.ts` repository — CRUD, list grouped by tag, mark consumed
+- [x] 3.2 `lib/db/todos.ts` repository — CRUD, status transitions, recent-activity rollup per todo
+- [x] 3.3 Validation: research-tagged queue items require a `linkedTodoId`; reject otherwise
+- [x] 3.4 Vitest for both repositories
 
 ## 4. Research-application logic (W-data)
 
-- [ ] 4.1 `lib/db/pending-research.ts` repository — append a pending entry on Research session save, list pending by todo, mark applied, list expired
-- [ ] 4.2 `lib/domain/research-application.ts` — `evaluatePending(now, pending, recentCreateSessions)` returns `{ apply: [...], expire: [...] }`
-- [ ] 4.3 Hook: when a Create session is saved with a `linkedItemId`, mark all pending research for that todo as `applied`
-- [ ] 4.4 Background expiry sweep — on app boot and once per hour while open, evaluate pending entries, post expired entries as bank debits, surface notifications via an in-app notification queue
-- [ ] 4.5 Cancel pending entry on session delete
-- [ ] 4.6 Vitest for the apply/expire matrix
+- [x] 4.1 `lib/db/pending-research.ts` repository — append a pending entry on Research session save, list pending by todo, mark applied, list expired
+- [x] 4.2 `lib/domain/research-application.ts` — `evaluatePending(now, pending, recentCreateSessions)` returns `{ apply: [...], expire: [...] }`
+- [x] 4.3 Hook: when a Create session is saved with a `linkedItemId`, mark all pending research for that todo as `applied`
+- [x] 4.4 Background expiry sweep — on app boot and once per hour while open, evaluate pending entries, post expired entries as bank debits, surface notifications via an in-app notification queue
+- [x] 4.5 Cancel pending entry on session delete
+- [x] 4.6 Vitest for the apply/expire matrix
 
 ## 5. Pomodoro mode (W-data + W-ui)
 
-- [ ] 5.1 Extend `lib/domain/timer.ts` with Pomodoro state: `pomodoro: { focusMinutes, breakMinutes, phase: "focus" | "break" }` attached to running sessions
-- [ ] 5.2 Auto-stop logic when the focus block elapses; emits a `PomodoroComplete` event the UI subscribes to
-- [ ] 5.3 Break countdown, no bank effect during break
-- [ ] 5.4 Bank-empty short-circuit during a leisure Pomodoro
+- [x] 5.1 Extend `lib/domain/timer.ts` with Pomodoro state: `pomodoro: { focusMinutes, breakMinutes, phase: "focus" | "break" }` attached to running sessions
+- [x] 5.2 Auto-stop logic when the focus block elapses; emits a `PomodoroComplete` event the UI subscribes to
+- [x] 5.3 Break countdown, no bank effect during break
+- [x] 5.4 Bank-empty short-circuit during a leisure Pomodoro
 - [ ] 5.5 Settings UI for focus/break lengths
 - [ ] 5.6 Home toggle for Pomodoro mode persists in `prefs`
-- [ ] 5.7 Vitest for the Pomodoro state machine
+- [x] 5.7 Vitest for the Pomodoro state machine
 
 ## 6. Cosmetic progression (W-data + W-ui)
 
-- [ ] 6.1 `lib/domain/progression.ts` — pure XP / level / streak math; level table at fixed thresholds (e.g. 0/100/300/600/1000/1500/…)
-- [ ] 6.2 Hook XP awards into session-saved events
-- [ ] 6.3 Streak evaluator runs on app boot and after each Create session save
-- [ ] 6.4 `lib/themes/themes.ts` — static array of theme objects (id, name, palette CSS variables, unlocked-at-level)
+- [x] 6.1 `lib/domain/progression.ts` — pure XP / level / streak math; level table at fixed thresholds (e.g. 0/100/300/600/1000/1500/…)
+- [x] 6.2 Hook XP awards into session-saved events
+- [x] 6.3 Streak evaluator runs on app boot and after each Create session save
+- [x] 6.4 `lib/themes/themes.ts` — static array of theme objects (id, name, palette CSS variables, unlocked-at-level)
 - [ ] 6.5 Settings → Themes UI: grid of unlocked vs. locked themes with selection
 - [ ] 6.6 Apply selected theme via CSS-variable swap on `<html>`
 - [ ] 6.7 Profile screen — XP, level + progress bar, current streak, longest streak, themes grid, "How this works" disclosure
 - [ ] 6.8 Level-up celebration overlay (one-time per level)
-- [ ] 6.9 Vitest for XP, level boundaries, streak transitions
+- [x] 6.9 Vitest for XP, level boundaries, streak transitions
 
 ## 7. UI shell + pickers (W-ui)
 
