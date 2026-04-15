@@ -2,6 +2,24 @@ import { v4 as uuid } from "uuid";
 import { getDb, type PickleJuiceDB } from "./db";
 import { sumSecondsByCategory } from "../domain/aggregate";
 import { sessionsToCsv } from "../export/csv";
+import {
+  entriesForCreateSession,
+  entriesForDelete,
+  entriesForEdit,
+  entriesForLeisureSession,
+} from "../domain/time-bank";
+import {
+  addXp,
+  checkBrokenStreak,
+  evaluateStreak,
+  xpForSession,
+} from "../domain/progression";
+import { BankRepository } from "./bank";
+import { PendingResearchRepository } from "./pending-research";
+import { PrefsRepository } from "./prefs";
+import { ProgressionRepository } from "./progression";
+import { QueueRepository } from "./queue";
+import { TodoRepository } from "./todos";
 import type {
   ActiveSession,
   Category,
@@ -36,15 +54,42 @@ function assertValidRange(startIso: string, endIso: string) {
   }
 }
 
+function isLeisure(s: { category: Category; subtype?: string }) {
+  return s.category === "consume" && s.subtype === "leisure";
+}
+
+function isResearch(s: { category: Category; subtype?: string }) {
+  return s.category === "consume" && s.subtype === "research";
+}
+
 export class DexieSessionRepository implements SessionRepository {
-  constructor(private readonly db: PickleJuiceDB = getDb()) {}
+  private readonly bank: BankRepository;
+  private readonly pendingResearch: PendingResearchRepository;
+  private readonly prefs: PrefsRepository;
+  private readonly progression: ProgressionRepository;
+  private readonly queue: QueueRepository;
+  private readonly todos: TodoRepository;
+
+  constructor(private readonly db: PickleJuiceDB = getDb()) {
+    this.bank = new BankRepository(db);
+    this.pendingResearch = new PendingResearchRepository(db);
+    this.prefs = new PrefsRepository(db);
+    this.progression = new ProgressionRepository(db);
+    this.queue = new QueueRepository(db);
+    this.todos = new TodoRepository(db);
+  }
 
   async createFromDraft(draft: DraftSession): Promise<Session> {
     assertValidRange(draft.startIso, draft.endIso);
+    if (draft.category === "consume" && !draft.subtype) {
+      draft = { ...draft, subtype: "leisure" };
+    }
     const now = nowIso();
     const session: Session = {
       id: uuid(),
       category: draft.category,
+      subtype: draft.subtype,
+      linkedItemId: draft.linkedItemId,
       startIso: draft.startIso,
       endIso: draft.endIso,
       durationSeconds: secondsBetween(draft.startIso, draft.endIso),
@@ -53,6 +98,35 @@ export class DexieSessionRepository implements SessionRepository {
       updatedAt: now,
     };
     await this.db.sessions.add(session);
+
+    const prefs = await this.prefs.get();
+
+    if (session.category === "create") {
+      await this.bank.append(entriesForCreateSession(session, prefs.earnRatio));
+      if (session.linkedItemId) {
+        const pending = await this.pendingResearch.listPendingByTodo(session.linkedItemId);
+        for (const p of pending) {
+          await this.pendingResearch.markApplied(p.id);
+        }
+      }
+    } else if (isLeisure(session)) {
+      await this.bank.append(entriesForLeisureSession(session));
+    } else if (isResearch(session) && session.linkedItemId) {
+      await this.pendingResearch.create({
+        todoId: session.linkedItemId,
+        sessionId: session.id,
+        minutes: session.durationSeconds / 60,
+        startedAt: session.startIso,
+        applyWindowDays: prefs.applyWindowDays,
+      });
+    }
+
+    if (session.linkedItemId && session.category === "consume") {
+      await this.queue.markConsumed(session.linkedItemId).catch(() => undefined);
+    }
+
+    await this.awardXpAndStreak(session);
+
     return session;
   }
 
@@ -67,11 +141,35 @@ export class DexieSessionRepository implements SessionRepository {
     assertValidRange(merged.startIso, merged.endIso);
     merged.durationSeconds = secondsBetween(merged.startIso, merged.endIso);
     await this.db.sessions.put(merged);
+
+    const prefs = await this.prefs.get();
+    await this.bank.append(entriesForEdit(existing, merged, prefs.earnRatio));
+
+    if (isResearch(existing) && existing.linkedItemId && existing.id) {
+      await this.pendingResearch.cancelBySession(existing.id);
+    }
+    if (isResearch(merged) && merged.linkedItemId) {
+      await this.pendingResearch.create({
+        todoId: merged.linkedItemId,
+        sessionId: merged.id,
+        minutes: merged.durationSeconds / 60,
+        startedAt: merged.startIso,
+        applyWindowDays: prefs.applyWindowDays,
+      });
+    }
+
     return merged;
   }
 
   async delete(id: string): Promise<void> {
+    const existing = await this.db.sessions.get(id);
+    if (!existing) return;
     await this.db.sessions.delete(id);
+    const prefs = await this.prefs.get();
+    await this.bank.append(entriesForDelete(existing, prefs.earnRatio));
+    if (isResearch(existing)) {
+      await this.pendingResearch.cancelBySession(existing.id);
+    }
   }
 
   async listAll(): Promise<Session[]> {
@@ -121,6 +219,38 @@ export class DexieSessionRepository implements SessionRepository {
     const csv = sessionsToCsv(sessions);
     return new Blob([csv], { type: "text/csv;charset=utf-8" });
   }
+
+  private async awardXpAndStreak(session: Session) {
+    const prefs = await this.prefs.get();
+    const before = await this.progression.get();
+    const xp = xpForSession(session, prefs);
+    const xpResult = addXp(before, xp);
+    let next = xpResult.newState;
+
+    if (session.category === "create") {
+      const dayStart = new Date(session.startIso);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(session.startIso);
+      dayEnd.setHours(23, 59, 59, 999);
+      const dayCreates = await this.listByRange(
+        dayStart.toISOString(),
+        dayEnd.toISOString(),
+      );
+      const todaysCreateMinutes =
+        dayCreates
+          .filter((s) => s.category === "create")
+          .reduce((sum, s) => sum + s.durationSeconds, 0) / 60;
+      next = evaluateStreak(
+        next,
+        session.startIso,
+        todaysCreateMinutes,
+        prefs.streakThresholdMinutes,
+      );
+    }
+
+    next = checkBrokenStreak(next, nowIso());
+    await this.progression.put(next);
+  }
 }
 
 export class EmptyExportError extends Error {
@@ -135,6 +265,7 @@ export const sessionRepository: SessionRepository = new DexieSessionRepository()
 export type {
   ActiveSession,
   Category,
+  ConsumeSubtype,
   DraftSession,
   Session,
   SessionRepository,
